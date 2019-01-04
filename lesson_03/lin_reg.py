@@ -31,6 +31,7 @@ loss = tf.square(Y - prediction, name='loss')
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(loss)
 
+writer = tf.summary.FileWriter('./graphs', tf.get_default_graph())
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -41,6 +42,7 @@ with tf.Session() as sess:
             sess.run(optimizer, feed_dict={X:x, Y:y})
 
     w_out, b_out = sess.run([w, b])
+writer.close()
 
 #def huber loss using tensorflow
 def huber_loss(label, pred, delta=14.0):
@@ -49,7 +51,16 @@ def huber_loss(label, pred, delta=14.0):
     def f2(): return delta * residual - 0.5*tf.square(delta)
     return tf.cond(residual < delta, f1, f2)
 
+"""
+There is something called tf.data that is a better way to load the data
+that is going to be used for training (better than tf.placeholder).
+
+This works by storing the data in a tensorflow object rather than 
+an array like we are doing above. tf.data.Dataset.from_tensor_slices
+will turn our array into the appropriate tf.data object.
+
+
+"""
 
 
 
-    

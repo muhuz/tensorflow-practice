@@ -11,3 +11,8 @@ writer = tf.summary.FileWriter('./graphs', tf.get_default_graph())
 with tf.Session() as sess:
     sess.run(c)
 writer.close()
+
+"""
+After you have this code set in place run the following
+from the command line: tensorboard --logdir="./graphs"
+"""
