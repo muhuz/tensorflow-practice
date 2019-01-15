@@ -44,7 +44,7 @@ print(sess.run(out))
 
 x = tf.constant([0, -2, -1, 0, 1, 2], shape=(2,3))
 y = tf.zeros_like(x)
-tf.equal(x, y)
+print(sess.run(tf.equal(x, y)))
 
 ###############################################################################
 # 1d: Create the tensor x of value 
@@ -59,7 +59,14 @@ tf.equal(x, y)
 # Hint: Use tf.gather().
 ###############################################################################
 
-# YOUR CODE
+x = tf.constant([29.05088806,  27.61298943,  31.19073486,  29.35532951,
+ 30.97266006,  26.67541885,  38.08450317,  20.74983215,
+ 34.94445419,  34.45999146,  29.06485367,  36.01657104,
+ 27.88236427,  20.56035233,  30.20379066,  29.51215172,
+ 33.71149445,  28.59134293,  36.05556488,  28.66994858], shape=(5,4))
+y = tf.gather_nd(x, tf.where(tf.greater(x, 30)))
+print(sess.run(y))
+
 
 ###############################################################################
 # 1e: Create a diagnoal 2-d tensor of size 6 x 6 with the diagonal values of 1,
@@ -67,7 +74,8 @@ tf.equal(x, y)
 # Hint: Use tf.range() and tf.diag().
 ###############################################################################
 
-# YOUR CODE
+y = tf.diag(tf.range(7))
+print(sess.run(y))
 
 ###############################################################################
 # 1f: Create a random 2-d tensor of size 10 x 10 from any distribution.
@@ -75,7 +83,8 @@ tf.equal(x, y)
 # Hint: Look at tf.matrix_determinant().
 ###############################################################################
 
-# YOUR CODE
+y = tf.matrix_determinant(tf.random_uniform(shape=(10,10)))
+print(sess.run(y))
 
 ###############################################################################
 # 1g: Create tensor x with value [5, 2, 3, 5, 10, 6, 2, 3, 4, 2, 1, 1, 0, 9].
@@ -83,7 +92,8 @@ tf.equal(x, y)
 # Hint: use tf.unique(). Keep in mind that tf.unique() returns a tuple.
 ###############################################################################
 
-# YOUR CODE
+y = tf.constant([5, 2, 3, 5, 10, 6, 2, 3, 4, 2, 1, 1, 0, 9])
+print(sess.run(tf.unique(y)))
 
 ###############################################################################
 # 1h: Create two tensors x and y of shape 300 from any normal distribution,
@@ -95,4 +105,10 @@ tf.equal(x, y)
 # Hint: see the Huber loss function in the lecture slides 3.
 ###############################################################################
 
-# YOUR CODE
+x = tf.random_normal(shape=(300,))
+y = tf.random_normal(shape=(300,))
+z = tf.reduce_mean(x - y)
+zz = tf.cond(z > 0, lambda: tf.reduce_mean(tf.square(x-y)), lambda:tf.reduce_mean(tf.abs(x-y)))
+print(sess.run(zz))
+
+
