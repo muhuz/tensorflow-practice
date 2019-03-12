@@ -4,10 +4,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import time 
 
 import tensorflow as tf
-import tf.contrib.layers as layers
+import tensorflow.contrib.layers as layers
 from tensorflow.examples.tutorials.mnist import input_data
 
-mnist = input_data.read_data_sets('/data/mnist', one_hot=True)
+mnist = input_data.read_data_sets('data/mnist', one_hot=True)
 
 LEARNING_RATE = 0.001
 BATCH_SIZE = 128
@@ -51,8 +51,7 @@ def fully_connected(inputs, out_dim, scope_name='fc'):
     return out
 
 class Convnet:
-    def __init__(self, dataset, batch_size, lr, dropout, n_epoch, skip_step):
-        self.dataset = dataset
+    def __init__(self, batch_size, lr, dropout, n_epoch, skip_step):
         self.batch_size = batch_size
         self.lr = lr
         self.dropout = dropout
@@ -60,19 +59,19 @@ class Convnet:
         self.skip_step = skip_step
         self.global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
 
-    def inference(self):
+    def inference(self, inputs):
         conv1 = conv_relu(inputs=self.img,
                         filters=32,
                         k_size=5,
                         stride=1,
-                        padding='SAME'
+                        padding='SAME',
                         scope_name='conv1')
         pool1 = maxpool(conv1, 2, 2, 'VALID', 'pool1')
         conv2 = conv_relu(inputs=pool1,
                           filters=64,
                           k_size=5,
                           stride=1,
-                          padding='SAME'
+                          padding='SAME',
                           scope_name='conv2')
         pool2 = maxpool(conv2, 2, 2, 'VALID', 'pool2')
         feature_dim = pool2.shape[1] * pool2.shape[2] * pool2.shape[3]
@@ -104,7 +103,6 @@ class Convnet:
 
     def build_graph(self):
         self.inference()
-        self.eval()
         self.create_loss()
         self.create_optimizer()
         self.create_summaries()
@@ -119,18 +117,33 @@ class Convnet:
             for index in range(0, num_batches * self.n_epochs):
                 X_batch, Y_batch = mnist.train.next_batch(self.batch_size)
                 _, loss_batch, summary = sess.run([self.optimizer, self.loss, self.summary_op],
-                        feed_dict={X: X_batch, Y:Y_batch, dropout: self.dropout})
+                        feed_dict={X: X_batch, Y:Y_batch, dropout:self.dropout})
                 writer.add_summary(summary, global_step=index)
                 total_loss += loss_batch
                 if (index+1) % self.skip_step == 0:
                     print('Average Loss at step {}: {:5.1f}'.format(index, total_loss / self.skip_step))
                     total_loss = 0
-                    saver.save(sess, 'checkpoints/convnet_mnist/mnist-convment', index)
+                    saver.save(sess, 'checkpoints/convnet_mnist/mnist-convnet', index)
             print('Optimization Finished')
 
-    def test(self):
+    def test(self, test_set):
+        saver = tf.train.Saver()
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            ckpt = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet_mnist'))
+            if ckpt and ckpt.model_checkpoint_path:
+                saver.restore(sess, ckpt.model_checkpoint_path)
+            results = sess.run([self.eval], feed_dict={X: test_set})
+        return results
+    
+def main():
+    cnet = Convnet(BATCH_SIZE, LEARNING_RATE, DROPOUT, N_EPOCHS, SKIP_STEP)
+    cnet.build_graph()
 
 
+
+if __name__ == '__main__':
+    main()
 
 
 
