@@ -121,6 +121,7 @@ class Convnet:
 
     def train(self):
         with tf.Session() as sess:
+            saver = tf.train.Saver()
             sess.run(self.iterator.initializer)
             sess.run(tf.global_variables_initializer())
             self.global_step.eval()
@@ -129,7 +130,7 @@ class Convnet:
             total_loss = 0
             for index in range(0, num_batches * self.n_epoch):
                 _, loss_batch, summary = sess.run([self.optimizer, self.loss, self.summary_op])
-                writer.add_summary(summary, global_step=index)
+                # writer.add_summary(summary, global_step=index)
                 total_loss += loss_batch
                 if (index+1) % self.skip_step == 0:
                     print('Average Loss at step {}: {:5.1f}'.format(index, total_loss / self.skip_step))
