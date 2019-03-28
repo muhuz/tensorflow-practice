@@ -6,13 +6,13 @@ import tensorflow as tf
 file_path = 'vgg_files'
 file_name = 'imagenet-vgg-verydeep-19.mat'
 
-vgg_weights =  sio.loadmat(os.path.join(file_path, file_name))
-vgg_layers = vgg_weights['layers']
+# vgg_weights =  sio.loadmat(os.path.join(file_path, file_name))
+# vgg_layers = vgg_weights['layers']
 
 class VGG():
-    def __init__(self, vgg_path, input_img):
+    def __init__(self, input_img):
         self.input = input_img
-        self.vgg_layers = sio.loadmat(os.path.join(vgg_path, file_name))['layers']
+        self.vgg_layers = sio.loadmat(os.path.join('vgg_files', 'imagenet-vgg-verydeep-19.mat'))['layers']
         self.mean_pixels = np.array([123.68, 116.779, 103.939]).reshape((1,1,1,3))
 
     def load_weights(self, layer_idx, expected_layer_name):
