@@ -33,12 +33,19 @@ class StyleTransfer():
         self.content_img - self.vgg.mean_pixels
         self.style_img - self.vgg.mean_pixels
 
-    def style_loss(self, F, P):
+    def content_loss(self, F, P):
         """
         F is the matrix representing the activations of given layer of 
         VGG. The rows of F are the activations of a filter, and the columns
         represent the position. P represents the original content image.
         """
-        coef = 
-        self.content_loss = coef * tf.square(F - P)
+        coef = 0.5 
+        self.content_loss = coef * tf.reduce_sum(tf.square(F - P))
+
+    def style_loss(self, G, A):
+        """
+        G is the Gram matrix of the original image and A is 
+        the Gram matrix of the input image.
+        """
+        self.style_loss = coef * tf.reduce_sum(tf.square(G - A))
 
