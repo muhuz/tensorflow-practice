@@ -22,7 +22,7 @@ class VGG():
         W = self.vgg_layers[0][layer_idx][0][0][2][0][0]
         b = self.vgg_layers[0][layer_idx][0][0][2][0][1]
         layer_name = self.vgg_layers[0][layer_idx][0][0][0][0]
-        assert layer_name = expected_layer_name
+        assert layer_name == expected_layer_name
         return W, b.reshape(b.size)
 
     def conv2d_relu(self, inputs, layer_idx, scope_name, stride=1, padding='VALID'):
@@ -57,25 +57,25 @@ class VGG():
         """
         Builds the full VGG19 computation graph
         """
-        self.conv2d_relu(self.input_img, 0, 'conv1_1')
-        self.conv2d_relu(self.conv1_1, 2, 'conv1_2')
-        self.avgpool(self.conv1_2, 'avgpool1')
-        self.conv2d_relu(self.avgpool1, 5, 'conv2_1')
-        self.conv2d_relu(self.conv2_1, 7, 'conv2_2')
-        self.avgpool(self.conv2_2, 'avgpool2')
-        self.conv2d_relu(self.avgpool2, 10, 'conv3_1')
-        self.conv2d_relu(self.conv3_1, 12, 'conv3_2')
-        self.conv2d_relu(self.conv3_2, 14, 'conv3_3')
-        self.conv2d_relu(self.conv3_3, 16, 'conv3_4')
-        self.avgpool(self.conv3_4, 'avgpool3')
-        self.conv2d_relu(self.avgpool3, 19, 'conv4_1')
-        self.conv2d_relu(self.conv4_1, 21, 'conv4_2')
-        self.conv2d_relu(self.conv4_2, 23, 'conv4_3')
-        self.conv2d_relu(self.conv4_3, 25, 'conv4_4')
-        self.avgpool(self.conv4_4, 'avgpool4')
-        self.conv2d_relu(self.avgpool4, 28, 'conv5_1')
-        self.conv2d_relu(self.conv5_1, 30, 'conv5_2')
-        self.conv2d_relu(self.conv5_2, 32, 'conv5_3')
-        self.conv2d_relu(self.conv5_3, 34, 'conv5_4')
-        self.avgpool(self.conv5_4, 'avgpool5')
+        self.conv1_1 = self.conv2d_relu(self.input, 0, 'conv1_1')
+        self.conv1_2 = self.conv2d_relu(self.conv1_1, 2, 'conv1_2')
+        self.avgpool1 = self.avgpool(self.conv1_2, scope_name='avgpool1')
+        self.conv2_1 = self.conv2d_relu(self.avgpool1, 5, 'conv2_1')
+        self.conv2_2 = self.conv2d_relu(self.conv2_1, 7, 'conv2_2')
+        self.avgpool2 = self.avgpool(self.conv2_2, scope_name='avgpool2')
+        self.conv3_1 = self.conv2d_relu(self.avgpool2, 10, 'conv3_1')
+        self.conv3_2 = self.conv2d_relu(self.conv3_1, 12, 'conv3_2')
+        self.conv3_3 = self.conv2d_relu(self.conv3_2, 14, 'conv3_3')
+        self.conv3_4 = self.conv2d_relu(self.conv3_3, 16, 'conv3_4')
+        self.avgpool3 = self.avgpool(self.conv3_4, scope_name='avgpool3')
+        self.conv4_1 = self.conv2d_relu(self.avgpool3, 19, 'conv4_1')
+        self.conv4_2 = self.conv2d_relu(self.conv4_1, 21, 'conv4_2')
+        self.conv4_3 = self.conv2d_relu(self.conv4_2, 23, 'conv4_3')
+        self.conv4_4 = self.conv2d_relu(self.conv4_3, 25, 'conv4_4')
+        self.avgpool4 = self.avgpool(self.conv4_4, scope_name='avgpool4')
+        self.conv5_1 = self.conv2d_relu(self.avgpool4, 28, 'conv5_1')
+        self.conv5_2 = self.conv2d_relu(self.conv5_1, 30, 'conv5_2')
+        self.conv5_3 = self.conv2d_relu(self.conv5_2, 32, 'conv5_3')
+        self.conv5_4 = self.conv2d_relu(self.conv5_3, 34, 'conv5_4')
+        self.avgpool5 = self.avgpool(self.conv5_4, scope_name='avgpool5')
 
