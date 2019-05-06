@@ -56,7 +56,7 @@ class StyleTransfer():
         Given the activations of a layer, F, reshape the layer into
         a matrix and return the Gram matrix.
         """
-        F_mat = tf.reshape(F, (N,M))
+        F_mat = tf.reshape(F, (M,N))
         return tf.matmul(F_mat, F_mat, transpose_a=True)
 
     def single_style_loss(self, a, g):
@@ -68,7 +68,7 @@ class StyleTransfer():
         M = a.shape[1] * a.shape[2] # height * width of filter
         A =  self.gram_mat(a, N, M)
         G = self.gram_mat(g, N, M)
-        return tf.reduce_sum(tf.square(G - A)/ (2 * N * M)**2)
+        return tf.reduce_sum(tf.square(G - A)/ ((2 * N * M)**2))
 
     def style_loss(self, A):
         """
@@ -113,7 +113,7 @@ class StyleTransfer():
         self.create_summary()
 
     def train(self, n_iters):
-
+        skip_step = 1
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             # initialize image
@@ -142,11 +142,12 @@ class StyleTransfer():
                 sess.run(self.opt)
                 if (index+1) % skip_step == 0:
                     gen_image, loss, summary = sess.run([self.input_img, self.loss, self.summary_op])
-
+                    print(gen_image)
                     gen_image = gen_image + self.vgg.mean_pixels
+
                     writer.add_summary(summary, global_step=index)
                     print('Step {}\n   Sum: {:5.1f}'.format(index + 1, np.sum(gen_image)))
-                    print('   Loss: {:5.1f}'.format(total_loss))
+                    print('   Loss: {:5.1f}'.format(loss))
                     print('   Took: {} seconds'.format(time.time() - start_time))
                     start_time = time.time()
 
@@ -154,7 +155,7 @@ class StyleTransfer():
                         saver.save(sess, "checkpoints/style_transfer", index) 
 
 if __name__ == '__main__':
-    machine = StyleTransfer('images/nicol_bolas.jpg', 'images/starry_night.jpg', 433, 350)
+    machine = StyleTransfer('images/nicol_bolas.jpg', 'images/starry_night.jpg', 200, 100)
     machine.build_graph()
     machine.train(300)
                 

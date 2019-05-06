@@ -25,7 +25,7 @@ class VGG():
         assert layer_name == expected_layer_name
         return W, b.reshape(b.size)
 
-    def conv2d_relu(self, inputs, layer_idx, scope_name, stride=1, padding='VALID'):
+    def conv2d_relu(self, inputs, layer_idx, scope_name, stride=1, padding='SAME'):
         """
         Returns the conv2d + relu calculation to the graph.
         """
@@ -34,7 +34,7 @@ class VGG():
             conv = tf.nn.conv2d(inputs, W, strides=[1, stride, stride, 1], padding=padding)
         return tf.nn.relu(conv + b, name=scope.name)
 
-    def avgpool(self, inputs, ksize=2, strides=2, padding='VALID', scope_name='avgpool'):
+    def avgpool(self, inputs, ksize=2, strides=2, padding='SAME', scope_name='avgpool'):
         """
         Implementation of avgpool using numpy.
         """
