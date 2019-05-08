@@ -38,12 +38,10 @@ class VGG():
         """
         Implementation of avgpool using numpy.
         """
-        with tf.variable_scope(scope_name, reuse=tf.AUTO_REUSE) as scope:
-            in_channel = inputs.shape[-1]
-            avg_filter = np.repeat(1.0/(ksize*ksize), ksize * ksize * in_channel * in_channel) 
-            avg_filter = avg_filter.reshape(ksize, ksize, in_channel, in_channel)
-            pool = tf.nn.conv2d(inputs, avg_filter, strides=[1, strides, strides, 1], padding=padding)
-        return pool
+        with tf.variable_scope(scope_name):
+            return tf.nn.avg_pool(inputs, ksize=[1, 2, 2,1],
+                                    strides=[1, 2, 2, 1],
+                                    padding=padding)
 
     # def avgpool(inputs, ksize, strides, padding='VALID', scope_name='avgpool'):
         # """

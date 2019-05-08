@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 import time
 
-from utils import get_resized_image, init_random_image
+from utils import get_resized_image, init_random_image, save_image
 from vgg19 import VGG
 
 class StyleTransfer():
@@ -24,7 +24,7 @@ class StyleTransfer():
         self.style_layer_w = [0.5, 1.0, 1.5, 3.0, 4.0]
         # The alpha and beta hyperparameters that weight the total loss function
         self.content_w = 0.01 
-        self.style_w = 1.0
+        self.style_w = 1.5
 
     def input_img(self):
         """
@@ -42,13 +42,12 @@ class StyleTransfer():
         self.content_img - self.vgg.mean_pixels
         self.style_img - self.vgg.mean_pixels
 
-    def content_loss(self, F, P):
+    def _content_loss(self, F, P):
         """
         F is the matrix representing the activations of given layer of 
         VGG. The rows of F are the activations of a filter, and the columns
         represent the position. P represents the original content image.
         """
-        # coef = 1 / 
         self.content_loss = tf.reduce_sum(tf.square(F - P)) / (4.0 * tf.size(P, out_type=tf.float32)) 
 
     def gram_mat(self, F, N, M):
@@ -70,14 +69,18 @@ class StyleTransfer():
         G = self.gram_mat(g, N, M)
         return tf.reduce_sum(tf.square(G - A)/ ((2 * N * M)**2))
 
-    def style_loss(self, A):
+    def _style_loss(self, A):
         """
         A is a layer of the net.
         """
         n_layers = len(A)
+        self.ai = [A[i] for i in range(n_layers)]
+        self.layers_i = [getattr(self.vgg, self.style_layers[i]) for i in range(n_layers)]
         losses = [self.single_style_loss(A[i],
                   getattr(self.vgg, self.style_layers[i])) for i in range(n_layers)]
+        self.style_list = [losses[i] * self.style_layer_w[i] for i in range(n_layers)]
         self.style_loss = tf.reduce_sum([losses[i] * self.style_layer_w[i] for i in range(n_layers)])
+        # tf.print(self.style_loss, [self.style_loss], message='Style Loss:')
 
     def loss(self):
         """
@@ -88,22 +91,23 @@ class StyleTransfer():
                 sess.run(self.input_img.assign(self.content_img))
                 gen_img_content = getattr(self.vgg, self.content_layer)
                 content_img_content = sess.run(gen_img_content)
-            self.content_loss(content_img_content, gen_img_content)
+            self._content_loss(content_img_content, gen_img_content)
 
             with tf.Session() as sess:
                 sess.run(self.input_img.assign(self.style_img))
                 style_layers = sess.run([getattr(self.vgg, layer) for layer in self.style_layers])
-                self.style_loss(style_layers)
-            self.loss = self.content_w * self.content_loss + self.style_loss * self.style_loss
+                self._style_loss(style_layers)
+            self.loss = self.content_w * self.content_loss + self.style_w * self.style_loss
 
     def optimize(self):
         self.opt = tf.train.AdamOptimizer(self.lr).minimize(self.loss, global_step=self.global_step)
 
     def create_summary(self):
-        tf.summary.scalar('content loss', self.content_loss)
-        tf.summary.scalar('style loss', self.style_loss)
-        tf.summary.scalar('loss', self.loss)
-        self.summary_op = tf.summary.merge_all()
+        with tf.variable_scope('summaries') as scope:
+            tf.summary.scalar('content loss', self.content_loss)
+            tf.summary.scalar('style loss', self.style_loss)
+            tf.summary.scalar('loss', self.loss)
+            self.summary_op = tf.summary.merge_all()
 
     def build_graph(self):
         self.input_img()
@@ -112,7 +116,7 @@ class StyleTransfer():
         self.optimize()
         self.create_summary()
 
-    def train(self, n_iters):
+    def train(self, n_iters, image_name):
         skip_step = 1
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
@@ -142,7 +146,6 @@ class StyleTransfer():
                 sess.run(self.opt)
                 if (index+1) % skip_step == 0:
                     gen_image, loss, summary = sess.run([self.input_img, self.loss, self.summary_op])
-                    print(gen_image)
                     gen_image = gen_image + self.vgg.mean_pixels
 
                     writer.add_summary(summary, global_step=index)
@@ -150,12 +153,14 @@ class StyleTransfer():
                     print('   Loss: {:5.1f}'.format(loss))
                     print('   Took: {} seconds'.format(time.time() - start_time))
                     start_time = time.time()
+                    filename = os.path.join('outputs', '{}_{}.jpg'.format(image_name, index))
+                    save_image(filename, gen_image)
 
                     if (index + 1) % 20 == 0:
                         saver.save(sess, "checkpoints/style_transfer", index) 
 
 if __name__ == '__main__':
-    machine = StyleTransfer('images/nicol_bolas.jpg', 'images/starry_night.jpg', 200, 100)
+    machine = StyleTransfer('images/campanile.jpg', 'images/starry_night.jpg', 350, 450)
     machine.build_graph()
-    machine.train(300)
+    machine.train(300, 'starry_camp')
                 
