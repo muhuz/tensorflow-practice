@@ -21,10 +21,10 @@ class StyleTransfer():
                                            trainable=False)
         self.content_layer = 'conv4_2'
         self.style_layers = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1']
-        self.style_layer_w = [0.5, 1.0, 1.5, 3.0, 4.0]
+        self.style_layer_w = [0.5, 0.5, 0.5, 0.5, 0.5]
         # The alpha and beta hyperparameters that weight the total loss function
-        self.content_w = 0.01 
-        self.style_w = 1.5
+        self.content_w = 1e2 
+        self.style_w = 1e-2
 
     def input_img(self):
         """
@@ -160,7 +160,7 @@ class StyleTransfer():
                         saver.save(sess, "checkpoints/style_transfer", index) 
 
 if __name__ == '__main__':
-    machine = StyleTransfer('images/campanile.jpg', 'images/starry_night.jpg', 350, 450)
+    machine = StyleTransfer('images/tuebingen.jpg', 'images/starry_night.jpg', 350, 450)
     machine.build_graph()
-    machine.train(300, 'starry_camp')
+    machine.train(300, 'starry_tue')
                 
